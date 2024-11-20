@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "130499422560",
+    "project_id": "pecsleague",
+    "storage_bucket": "pecsleague.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:130499422560:android:e12727c32d00788c2a5605",
+        "android_client_info": {
+          "package_name": "com.pecs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC43l6Zufh0Pb0HiC37pRHI576lVexcUCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
