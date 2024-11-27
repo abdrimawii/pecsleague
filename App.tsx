@@ -8,7 +8,7 @@ import messaging from '@react-native-firebase/messaging';
 
 
 import SignupScreen from './Auth/SignUp';
-import ForgetPasswordScreen from './Auth/ForgetPassword';
+import ForgetPasswordScreen from './Auth/ForgotPassword';
 import LoginScreen from './Auth/Login';
 
 async function requestUserPermission() {
@@ -290,7 +290,7 @@ export default function App() {
         />
 
         <Stack.Screen
-          name="ForgetPassword"
+          name="ForgotPassword"
           component={ForgetPasswordScreen}
           options={{
             headerTitle: '',

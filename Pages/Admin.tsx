@@ -13,12 +13,14 @@ import NewsfeedModal from './Modals/NewsfeedModal';
 import MatchesModal from './Modals/MatchesModal'; 
 import UpdateMatches from './UpdateMatches'; 
 import LeagueUpdate from './LeagueUpdate'; 
+import NotificationsModal from './NotificationsModal'; // Ensure the path is correct
 
 export default function AdminScreen({ navigation }: { navigation: any }) {
   const [newsfeedModalVisible, setNewsfeedModalVisible] = useState(false);
   const [matchesModalVisible, setMatchesModalVisible] = useState(false); 
   const [updateMatchesModalVisible, setUpdateMatchesModalVisible] = useState(false); 
   const [leagueUpdateModalVisible, setLeagueUpdateModalVisible] = useState(false); 
+  const [notificationsModalVisible, setNotificationsModalVisible] = useState(false); // New state for NotificationsModal
 
   const handleSaveNewsfeed = (headerText: string, imageUrl: string, subHeader: string) => {
     console.log('Saved Newsfeed:', { headerText, imageUrl, subHeader });
@@ -56,6 +58,11 @@ export default function AdminScreen({ navigation }: { navigation: any }) {
         <TouchableOpacity style={styles.button} onPress={() => setNewsfeedModalVisible(true)}>
           <Text style={styles.buttonText}>Newsfeed</Text>
         </TouchableOpacity>
+
+        {/* New button for Notifications */}
+        <TouchableOpacity style={styles.button} onPress={() => setNotificationsModalVisible(true)}>
+          <Text style={styles.buttonText}>Notifications</Text>
+        </TouchableOpacity>
       </View>
 
       <NewsfeedModal
@@ -78,6 +85,12 @@ export default function AdminScreen({ navigation }: { navigation: any }) {
       <LeagueUpdate
         visible={leagueUpdateModalVisible}
         onClose={() => setLeagueUpdateModalVisible(false)} 
+      />
+
+      {/* Add NotificationsModal */}
+      <NotificationsModal
+        visible={notificationsModalVisible}
+        onClose={() => setNotificationsModalVisible(false)}
       />
 
       <CustomNavbar navigation={navigation} />
@@ -127,7 +140,7 @@ const styles = StyleSheet.create({
     left: 30,
   },
   buttonContainer: {
-    marginTop: 250,
+    marginTop: 100,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'space-around',
@@ -137,7 +150,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 8,
-    marginBottom: 15,
+    marginBottom: 25,
     width: '80%',
     alignItems: 'center',
   },

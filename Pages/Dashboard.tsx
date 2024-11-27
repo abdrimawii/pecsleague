@@ -9,6 +9,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyC43l6Zufh0Pb0HiC37pRHI576lVexcUCs",
   authDomain: "pecsleague.firebaseapp.com",
   databaseURL: "https://pecsleague-default-rtdb.europe-west1.firebasedatabase.app",
+  
   projectId: "pecsleague",
   storageBucket: "pecsleague.appspot.com",
   messagingSenderId: "130499422560",
@@ -285,6 +286,7 @@ const News: React.FC<any> = ({ navigation }) => {
       </TouchableOpacity>
     </View>
 
+    {/* Comments Section */}
     {commentsVisibility[post.id] && (
       <View style={styles.commentsSection}>
         {post.comments.map((comment: Comment, index: number) => (
@@ -295,6 +297,7 @@ const News: React.FC<any> = ({ navigation }) => {
             </Text>
           </View>
         ))}
+        {/* Comment Input Field */}
         <View style={styles.commentInputContainer}>
           <TextInput
             style={styles.commentInput}

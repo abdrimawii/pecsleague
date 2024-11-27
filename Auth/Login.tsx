@@ -13,7 +13,6 @@ import {
 import { initializeApp,getApps } from 'firebase/app'; 
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore'; 
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
-
 const firebaseConfig = {
   apiKey: "AIzaSyC43l6Zufh0Pb0HiC37pRHI576lVexcUCs",
   authDomain: "pecsleague.firebaseapp.com",
@@ -110,7 +109,7 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
           onChangeText={setPassword}
           secureTextEntry
         />
-        <TouchableOpacity onPress={() => Alert.alert('Forgot Password pressed')}>
+        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
         </TouchableOpacity>
       </View>
