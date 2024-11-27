@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, StatusBar, Image, ImageSourcePropType } from 'react-native';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { initializeApp } from 'firebase/app';
+import { initializeApp,getApps } from 'firebase/app';
 
 const firebaseConfig = {
   apiKey: "AIzaSyC43l6Zufh0Pb0HiC37pRHI576lVexcUCs",
@@ -14,7 +14,8 @@ const firebaseConfig = {
   measurementId: "G-XXXXXXXXXX"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];  
+
 const db = getFirestore(app);
 
 const teamImages: { [key: string]: ImageSourcePropType } = {

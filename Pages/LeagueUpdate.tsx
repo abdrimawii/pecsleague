@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Modal, Text, TouchableOpacity, TextInput, StyleSheet, FlatList, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { initializeApp } from 'firebase/app';
+import { initializeApp,getApps} from 'firebase/app';
 import { getFirestore, collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 
@@ -17,7 +17,8 @@ const firebaseConfig = {
 };
 
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];  
+
 const db = getFirestore(app);
 
 interface Team {

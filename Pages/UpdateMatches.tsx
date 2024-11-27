@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Button, Alert } from 'react-native';
 import { getFirestore, collection, getDocs, updateDoc, doc, query, where } from 'firebase/firestore';
-import { initializeApp } from 'firebase/app';
+import { initializeApp,getApps } from 'firebase/app';
 
 
 const firebaseConfig = {
@@ -15,7 +15,8 @@ const firebaseConfig = {
   measurementId: "G-XXXXXXXXXX"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];  
+
 const db = getFirestore(app);
 
 interface UpdateMatchesProps {

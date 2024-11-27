@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, StatusBar, Animated, TouchableOpacity, Image, ImageBackground } from 'react-native';
 import CustomNavbar from './CustomNavbar';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { initializeApp } from 'firebase/app';
+import { initializeApp,getApps } from 'firebase/app';
 import { ScrollView } from 'react-native-gesture-handler';
 
 
@@ -33,7 +33,8 @@ const normalizeTeamName = (teamName: string): TeamName => {
   return teamName.replace(/\s+/g, '').toLowerCase() as TeamName;
 };
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];  
+
 const db = getFirestore(app);
 
 const Matches: React.FC<any> = ({ navigation }) => {

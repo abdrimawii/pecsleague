@@ -13,7 +13,7 @@ import {
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 
-import { initializeApp } from 'firebase/app';
+import { initializeApp,getApps } from 'firebase/app';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import {  query, where, getDocs } from 'firebase/firestore';
 
@@ -29,7 +29,8 @@ const firebaseConfig = {
 };
 
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];  
+
 const db = getFirestore(app);
 
 

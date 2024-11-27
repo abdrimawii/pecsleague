@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { initializeApp } from 'firebase/app'; 
+import { initializeApp,getApps } from 'firebase/app'; 
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore'; 
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 
@@ -25,7 +25,8 @@ const firebaseConfig = {
   measurementId: "G-XXXXXXXXXX"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];  
+
 
 const db = getFirestore(app); 
 

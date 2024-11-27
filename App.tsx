@@ -23,7 +23,6 @@ async function requestUserPermission() {
   }
 }
 
-import firebase from '@react-native-firebase/app'; 
 
 
 import News from './Pages/Dashboard';
@@ -43,20 +42,7 @@ import MatchInformations from './Pages/Sub Pages/MatchInformations';
 
 
 
-if (!firebase.apps.length) {
-  
-  firebase.initializeApp({
-    apiKey: "AIzaSyC43l6Zufh0Pb0HiC37pRHI576lVexcUCs",
-    authDomain: "pecsleague.firebaseapp.com",
-    projectId: "pecsleague",
-    storageBucket: "pecsleague.appspot.com",
-    messagingSenderId: "130499422560",
-    appId: "1:130499422560:android:e12727c32d00788c2a5605",
-    measurementId: "G-XXXXXXX",
-  });
-} else {
-  firebase.app();  
-}
+
 
 
 const { width, height } = Dimensions.get('window');

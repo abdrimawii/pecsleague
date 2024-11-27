@@ -9,7 +9,7 @@ import {
   StatusBar,
 } from 'react-native';
 import CustomNavbar from './CustomNavbar';
-import { initializeApp } from 'firebase/app';
+import { initializeApp,getApps } from 'firebase/app';
 import { getFirestore, collection, getDocs,where,query } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const firebaseConfig = {
@@ -24,7 +24,8 @@ const firebaseConfig = {
   measurementId: "G-XXXXXXXXXX"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];  
+
 const db = getFirestore(app);
 interface User {
   email: string;

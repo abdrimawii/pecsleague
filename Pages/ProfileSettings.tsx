@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
-import { initializeApp } from 'firebase/app';
+import { initializeApp,getApps } from 'firebase/app';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
@@ -27,7 +27,7 @@ const firebaseConfig = {
 };
 
 
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];  
 const db = getFirestore(app);
 
 interface ProfileSettingsProps {
