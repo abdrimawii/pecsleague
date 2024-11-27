@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { initializeApp } from 'firebase/app'; 
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore'; 
-
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 
 const firebaseConfig = {
   apiKey: "AIzaSyC43l6Zufh0Pb0HiC37pRHI576lVexcUCs",
@@ -34,25 +34,51 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
   const [password, setPassword] = useState('');
 
 
-  //login to check if the user exist in the database
   const handleSignIn = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password');
+      return;
+    }
+  
     try {
-      const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('email', '==', email), where('password', '==', password));
+     const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', email));
       const querySnapshot = await getDocs(q);
-
+  
       if (querySnapshot.empty) {
         Alert.alert('Login Failed', 'Invalid email or password');
-      } else {
-        const user = querySnapshot.docs[0].data();
-        Alert.alert('Login Successful', `Welcome back, ${user.email}`);
-        navigation.navigate('Home');
+        return;
       }
+  
+      const userDoc = querySnapshot.docs[0];
+      const userData = userDoc.data();
+  
+      if (userData.password !== password) {
+        Alert.alert('Login Failed', 'Invalid email or password');
+        return;
+      }
+  
+      const userToSave = {
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        password: userData.password, 
+        role: userData.role,
+      };
+  
+      
+      await AsyncStorage.setItem('userDetails', JSON.stringify(userToSave));
+
+      console.log('User details saved to AsyncStorage:', userToSave);
+  
+      navigation.navigate('Dashboard', { userEmail: userData.email });
+  
     } catch (error) {
       console.error('Error during login:', error);
       Alert.alert('Error', 'Something went wrong. Please try again later.');
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.background}>
@@ -94,22 +120,18 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
         </TouchableOpacity>
       </View>
 
-      {/* Text under Sign In Button */}
       <Text style={styles.infoText}>
         If you’ve signed into the app before, use the same credentials here. Otherwise...
       </Text>
 
-      {/* OR Text */}
       <Text style={styles.orText}>OR</Text>
 
-      {/* Sign Up Button */}
       <View style={styles.signUpButtonWrapper}>
       <TouchableOpacity style={styles.SignUpbuttonContainer} onPress={() => navigation.goBack()}>
       <Text style={styles.buttonTextSignup}>Sign Up</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Boxes for Sign Up */}
       <View style={styles.boxLeftWrapperSignUp}>
         <View style={styles.boxLeftSignUp} />
       </View>
@@ -117,7 +139,6 @@ export default function LoginScreen({ navigation }: { navigation: any }) {
         <View style={styles.boxRightSignUp} />
       </View>
 
-      {/* Boxes for decoration (Sign In) */}
       <View style={styles.boxLeftWrapper}>
         <View style={styles.boxLeft} />
       </View>

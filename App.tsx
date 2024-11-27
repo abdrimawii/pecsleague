@@ -2,11 +2,46 @@ import React, { useEffect, useState } from 'react';
 import { SafeAreaView, Text, StyleSheet, StatusBar, Image, Dimensions, TouchableOpacity, View, Animated } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
+
+
+
 
 import SignupScreen from './Auth/SignUp';
 import ForgetPasswordScreen from './Auth/ForgetPassword';
 import LoginScreen from './Auth/Login';
+
+async function requestUserPermission() {
+  const authorizationStatus = await messaging().requestPermission();
+
+  if (authorizationStatus === messaging.AuthorizationStatus.AUTHORIZED) {
+    console.log('Notification permission authorized');
+  } else if (authorizationStatus === messaging.AuthorizationStatus.PROVISIONAL) {
+    console.log('Notification permission provisional');
+  } else {
+    console.log('Notification permission denied');
+  }
+}
+
 import firebase from '@react-native-firebase/app'; 
+
+
+import News from './Pages/Dashboard';
+import League from './Pages/League'; 
+import Matches from './Pages/Matches'; 
+import Profile from './Pages/Profile'; 
+import Admin from './Pages/Admin';
+
+
+import MatchInformations from './Pages/Sub Pages/MatchInformations';
+
+
+
+
+
+
+
+
 
 if (!firebase.apps.length) {
   
@@ -33,7 +68,7 @@ function HomeScreen({ navigation }: { navigation: any }) {
   const [animatedLetters, setAnimatedLetters] = useState<any[]>([]);
 
   useEffect(() => {
-    
+    requestUserPermission();
     const letters = headerText.split('').map((letter, index) => ({
       text: letter,
       animation: new Animated.Value(0), 
@@ -60,7 +95,17 @@ function HomeScreen({ navigation }: { navigation: any }) {
     
     Animated.loop(Animated.stagger(0, animations)).start();
   }, []);
-
+  async function requestUserPermission() {
+    const authorizationStatus = await messaging().requestPermission();
+  
+    if (authorizationStatus === messaging.AuthorizationStatus.AUTHORIZED) {
+      console.log('Notification permission authorized');
+    } else if (authorizationStatus === messaging.AuthorizationStatus.PROVISIONAL) {
+      console.log('Notification permission provisional');
+    } else {
+      console.log('Notification permission denied');
+    }
+  }
   const getAnimatedStyle = (animation: Animated.Value) => {
     return {
       color: animation.interpolate({
@@ -69,7 +114,53 @@ function HomeScreen({ navigation }: { navigation: any }) {
       }),
     };
   };
+  useEffect(() => {
+    
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('Foreground Message:', remoteMessage);
+      
+    });
+  
+    return unsubscribe; 
+  }, []);
+  useEffect(() => {
+    
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('Background Message:', remoteMessage);
+      
+    });
+  }, []);
 
+  useEffect(() => {
+    
+    const unsubscribeOnNotificationOpenedApp = messaging().onNotificationOpenedApp(remoteMessage => {
+      console.log('Notification caused app to open from background state:', remoteMessage);
+      
+    });
+  
+    
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          console.log('Notification caused app to open from terminated state:', remoteMessage);
+          
+        }
+      });
+  
+    
+    return unsubscribeOnNotificationOpenedApp;
+  }, []);
+  useEffect(() => {
+    
+    const getToken = async () => {
+      const token = await messaging().getToken();
+      console.log('FCM Token:', token);
+      
+    };
+  
+    getToken();
+  }, []);
   return (
     <SafeAreaView style={styles.background}>
       <Image
@@ -151,6 +242,8 @@ function HomeScreen({ navigation }: { navigation: any }) {
 }
 
 export default function App() {
+
+  
   return (
     <NavigationContainer>
       <StatusBar
@@ -158,7 +251,10 @@ export default function App() {
         backgroundColor="transparent"
         translucent={true}
       />
-      <Stack.Navigator
+
+      
+      
+      <Stack.Navigator 
         initialRouteName="Home"
         screenOptions={{
           headerStyle: {
@@ -178,20 +274,20 @@ export default function App() {
           options={{ headerShown: false }}
         />
 
-<Stack.Screen
+        <Stack.Screen
 
-  name="Login"
-  component={LoginScreen}
-  options={{
-    headerTitle: '', 
-    headerStyle: {
-      backgroundColor: '#9f00ff',  
-      shadowOpacity: 0,  
-      elevation: 0,  
-    },
-    headerTintColor: '#fff',  
-  }}
-/>
+          name="Login"
+          component={LoginScreen}
+          options={{
+            headerTitle: '', 
+            headerStyle: {
+              backgroundColor: '#9f00ff',  
+              shadowOpacity: 0,  
+              elevation: 0,  
+            },
+            headerTintColor: '#fff',  
+          }}
+        />
 
         <Stack.Screen
           name="SignUp"
@@ -214,7 +310,71 @@ export default function App() {
             headerTitle: '',
           }}
         />
+
+      <Stack.Screen
+          name="MatchInformations"
+          component={MatchInformations}
+          options={{
+            headerTitle: '', 
+            headerStyle: {
+              backgroundColor: '#9f00ff',  
+              shadowOpacity: 0,  
+              elevation: 0,  
+            },
+            headerTintColor: '#fff',  
+          }}
+        />
+        <Stack.Screen
+          name="Dashboard"
+          component={News}
+          options={{
+          headerShown: false, 
+          animation:'fade'
+          }}
+        />
+
+        <Stack.Screen
+          name="League"
+          component={League}
+          options={{
+            headerShown: false, animation:'fade' 
+           
+          }}
+        />
+
+        <Stack.Screen
+          name="Matches"
+          component={Matches}
+          options={{
+            headerShown: false,animation:'fade' 
+           
+          }}
+        />
+
+        <Stack.Screen
+          name="Admin"
+          component={Admin}
+          options={{
+            headerShown: false, animation:'fade' 
+           
+          }}
+
+          
+/>
+
+<Stack.Screen
+          name="Profile"
+          component={Profile}
+          options={{
+            headerShown: false, animation:'fade' 
+           
+          }}
+
+          
+/>
       </Stack.Navigator>
+
+
     </NavigationContainer>
   );
 }
