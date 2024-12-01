@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, StatusBar, Image, ImageSourcePropType } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { initializeApp,getApps } from 'firebase/app';
+import { initializeApp, getApps } from 'firebase/app';
+import { playersDatabase } from './dataplayers';
 
 const firebaseConfig = {
   apiKey: "AIzaSyC43l6Zufh0Pb0HiC37pRHI576lVexcUCs",
@@ -15,10 +16,9 @@ const firebaseConfig = {
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];  
-
 const db = getFirestore(app);
 
-const teamImages: { [key: string]: ImageSourcePropType } = {
+const teamImages: { [key: string]: any } = {
   potatoes: require('../teams/potatoes.png'),
   knights: require('../teams/knights.png'),
   polarbears: require('../teams/polarbears.png'),
@@ -26,16 +26,25 @@ const teamImages: { [key: string]: ImageSourcePropType } = {
   panthers: require('../teams/panthers.png'),
 };
 
-const normalizeTeamName = (teamName: string): string => {
-  return teamName.replace(/\s+/g, '').toLowerCase();
+const playerIcon = require('../playericon.png');  
+
+type TeamName = 'potatoes' | 'knights' | 'polarbears' | 'easternelite' | 'panthers';
+
+interface Player {
+  name: string;
+  position: string;
+}
+
+const normalizeTeamName = (teamName: string): TeamName => {
+  return teamName.replace(/\s+/g, '').toLowerCase() as TeamName;
 };
 
 const MatchInformations: React.FC<any> = ({ route }) => {
   const [matchDetails, setMatchDetails] = useState<any>(null);
-  const { matchId } = route.params || {}; 
+  const [selectedTeam, setSelectedTeam] = useState<string>('club1');
+  const { matchId } = route.params || {};
 
   useEffect(() => {
-    console.log('Match ID:', matchId);  
     if (!matchId) {
       console.error('No matchId passed!');
       return;
@@ -65,29 +74,62 @@ const MatchInformations: React.FC<any> = ({ route }) => {
       </View>
     );
   }
-
+  const vsText = matchDetails.upcoming
+    ? 'vs'
+    : `${matchDetails.scoreHomeTeam} : ${matchDetails.scoreAwayTeam}`;
   const matchDate = new Date(matchDetails.matchDateTime);
+  const dateStr = matchDate.toLocaleDateString();
+  const timeStr = matchDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  const club1Name = matchDetails.club1;
+  const club2Name = matchDetails.club2;
+
+  const club1Logo = teamImages[normalizeTeamName(club1Name)];
+  const club2Logo = teamImages[normalizeTeamName(club2Name)];
+
+  const selectedPlayers = playersDatabase[normalizeTeamName(matchDetails[selectedTeam]) as TeamName];
+
   
-  const dateStr = matchDate.toLocaleDateString();  
-  const timeStr = matchDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });  
-  const club1Logo = teamImages[normalizeTeamName(matchDetails.club1)];
-  const club2Logo = teamImages[normalizeTeamName(matchDetails.club2)];
+  const forwards = selectedPlayers.filter(player => 
+    player.position === 'LW' || player.position === 'ST' || player.position === 'RW');
+  
+  
+  const leftWing = forwards.find(player => player.position === 'LW');
+  const rightWing = forwards.find(player => player.position === 'RW');
+  const striker = forwards.find(player => player.position === 'ST');
+  
+  
+  const orderedForwards = [leftWing, striker, rightWing];  const midfielders = selectedPlayers.filter(player => player.position === 'CM');
+  const defenders = selectedPlayers.filter(player => player.position === 'LB' || player.position === 'CB' || player.position === 'RB');
+  const goalkeeper = selectedPlayers.filter(player => player.position === 'GK');
+
+  
+  const starters = [...forwards.slice(0, 3), ...midfielders.slice(0, 3), ...defenders.slice(0, 4), ...goalkeeper.slice(0, 1)];
+  const substitutes = selectedPlayers.slice(11);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true} />
       <Text style={styles.title}>Match Information</Text>
-    
       <View style={styles.topBox}>
         <View style={styles.logosContainer}>
-          {club1Logo && <Image source={club1Logo} style={styles.teamLogo} resizeMode="contain" />}
-          <Text style={styles.clubText}>{matchDetails.club1}</Text>
+          <TouchableOpacity onPress={() => setSelectedTeam('club1')}>
+            <View style={[styles.logoWrapper, selectedTeam === 'club1' && styles.selectedLogo]}>
+              <Image source={club1Logo} style={styles.teamLogo} resizeMode="contain" />
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.clubText}>{club1Name}</Text>
         </View>
 
-        <Text style={styles.vsText}>vs</Text>
+        <Text style={styles.vsText}>{vsText}</Text>
 
         <View style={styles.logosContainer}>
-          {club2Logo && <Image source={club2Logo} style={styles.teamLogo} resizeMode="contain" />}
-          <Text style={styles.clubText}>{matchDetails.club2}</Text>
+          <TouchableOpacity onPress={() => setSelectedTeam('club2')}>
+            <View style={[styles.logoWrapper, selectedTeam === 'club2' && styles.selectedLogo]}>
+              <Image source={club2Logo} style={styles.teamLogo} resizeMode="contain" />
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.clubText}>{club2Name}</Text>
         </View>
       </View>
 
@@ -101,16 +143,87 @@ const MatchInformations: React.FC<any> = ({ route }) => {
           <Text style={styles.dateText}>{dateStr}</Text>
           <Text style={styles.timeText}>{timeStr}</Text>
         </View>
-        <Image
-        source={require('../footballfield.png')}
-        style={styles.logo}  
-        resizeMode="cover"
-      />
+        
+        <View style={styles.fieldContainer}>
+          <Image source={require('../field.png')} style={styles.fieldImage} />
+          
+          <View style={styles.formation}>
+            {/* Forward row: LW, ST, RW */}
+            <View style={styles.row}>
+          {orderedForwards.map((player, index) => player && (
+            <View key={index} style={styles.playerWrapper}>
+              <Image source={playerIcon} style={styles.playerIcon} />
+              <Text 
+  style={styles.playerText} 
+  numberOfLines={1} 
+  ellipsizeMode="tail"
+>
+  {player.name}
+</Text>
+              <Text style={styles.playerPosition}>{player.position}</Text>
+            </View>
+          ))}
             </View>
 
+            {/* Midfield row: CM, CM, CM */}
+            <View style={styles.row}>
+              {midfielders.slice(0, 3).map((player, index) => (
+                <View key={index} style={styles.playerWrapper}>
+                <Image source={playerIcon} style={styles.playerIcon} />
+                <Text 
+                  style={styles.playerText} 
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >
+                  {player.name}
+                </Text>
+                <Text style={styles.playerPosition}>{player.position}</Text>
+              </View>
+              ))}
+            </View>
+
+            {/* Defense row: LB, CB, CB, RB */}
+            <View style={styles.row}>
+              {defenders.slice(0, 4).map((player, index) => (
+                <View key={index} style={styles.playerWrapper}>
+                  <Image source={playerIcon} style={styles.playerIcon} />
+                  <Text style={styles.playerText}>{player.name}</Text>
+                  <Text style={styles.playerPosition}>{player.position}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Goalkeeper row: GK */}
+            <View style={[styles.goalkeeperWrapper]}>
+            {goalkeeper.slice(0, 1).map((player, index) => (
+              <View key={index} style={styles.playerWrapper}>
+                <Image source={playerIcon} style={styles.playerIcon} />
+                <Text style={styles.playerText}>{player.name}</Text>
+                <Text style={styles.playerPosition}>{player.position}</Text>
+              </View>
+            ))}
+            </View>
           </View>
-        );
-      };
+        </View>
+
+        <View style={styles.substitutesContainer}>
+          <Text style={styles.substitutesText}>Substitutes</Text>
+          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+            <View style={styles.substitutePlayersWrapper}>
+              {substitutes.map((player, index) => (
+                <View key={index} style={styles.substitutePlayerWrapper}>
+                  <Image source={playerIcon} style={styles.playerIcon} />
+                  <Text style={styles.substitutePlayer}>{player.name}</Text>
+                  <Text style={styles.substitutePlayerPosition}>{player.position}</Text>
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -121,7 +234,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
-    color: '#FFFFFFFF',
+    color: '#FFFFFF',
     fontFamily: 'BebasNeue-Regular',
     alignContent: 'center',
     top: -40,
@@ -145,9 +258,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',  
     marginHorizontal: 20,  
   },
+  logoWrapper: {
+    borderRadius: 35,
+    padding: 5,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedLogo: {
+    borderColor: 'white',
+  },
   teamLogo: {
-    width: 70,
-    height: 70,
+    width: 80,
+    height: 80,
   },
   clubText: {
     fontSize: 20,
@@ -163,7 +285,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,  
   },
   matchDetailsContainer: {
-    marginTop: -120,  
+    marginTop: -115,  
     width: '100%',
     paddingHorizontal: 20,
   },
@@ -174,33 +296,112 @@ const styles = StyleSheet.create({
   },
   matchDetailText: {
     fontSize: 18,
-    color: '#FFFFFFFF',
+    color: '#FFFFFF',
     fontFamily: 'Manrope-Regular',
   },
   stadiumText: {
-    marginTop:2,
+    marginTop: 2,
     fontSize: 18,
-    color: '#FFFFFFFF',
+    color: '#FFFFFF',
     fontFamily: 'Manrope-Regular',
   },
   dateText: {
-    marginTop:-180,
+    marginTop: -194,
     fontSize: 18,
     color: '#FFFFFF',
     fontFamily: 'Manrope-Regular',
   },
   timeText: {
-    marginTop:-178,
+    marginTop: -198,
     fontSize: 18,
     color: '#FFFFFF',
     fontFamily: 'Manrope-Regular',
   },
-  logo: {
-    width: '100%',
-    height: 300,  
-    marginTop: 110,
-    left:0,
+  fieldContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: 30,
+    position: 'relative',
+  },
+  fieldImage: {
+    width: '115%',
+    height: 315,
+    position: 'absolute',
+    top: 46,
+    transform: [{ rotate: '90deg' }],
+    borderRadius: 40,  // Add this to round the corners
+},
+  formation:{
+    position: 'absolute',
+    top: 20,
+    left: '33%',
+    transform: [{ translateX: -90 }],  
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  playerWrapper: {
+    flexDirection: 'column', 
+    alignItems: 'center',
+    marginHorizontal: 4, 
+  },
+  playerIcon: {
+    width: 50, 
+    height: 50, 
+    marginBottom: 5, 
+    tintColor:'black'
+  },
+  playerText: {
+    color: '#000',
+    fontSize: 14,
+    fontFamily: 'Manrope-Regular',
+    textAlign: 'center',
+    width: 70,  
+    overflow: 'hidden',  
+    flexShrink: 1,  
+},
+  playerPosition: {
+    color: '#555',
+    fontSize: 12,
+    fontFamily: 'Manrope-Regular',
+    textAlign: 'center',
+  },
+  substitutesContainer: {
+    marginTop: 410,
+    alignItems: 'flex-start',
+  },
+  substitutesText: {
+    fontSize: 18,
+    fontFamily: 'Manrope-Regular',
+    color: '#000',
+    textAlign: 'center',
+  },
+  substitutePlayersWrapper: {
+    flexDirection: 'row', 
+    justifyContent: 'space-evenly',
+    paddingVertical: 5, 
     
+  },
+  substitutePlayerWrapper: {
+    marginRight: 15,
+  },
+  substitutePlayer: {
+    fontSize: 14,
+    fontFamily: 'Manrope-Regular',
+    color: '#333',
+  },
+  substitutePlayerPosition: {
+    fontSize: 12,
+    fontFamily: 'Manrope-Regular',
+    color: '#555',
+  },
+  goalkeeperWrapper: {
+    position: 'absolute',
+    bottom: -75, 
+    left: '36%',  
   },
 });
 

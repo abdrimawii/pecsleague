@@ -17,6 +17,15 @@ const firebaseConfig = {
   appId: "1:130499422560:android:e12727c32d00788c2a5605",
   measurementId: "G-XXXXXXXXXX",
 };
+type TeamName = 'Potatoes' | 'Knights' | 'Polar Bears' | 'Eastern Elite' | 'Panthers';
+
+const teamImages: Record<TeamName, any> = {
+  Potatoes: require('./teams/potatoes.png'),
+  Knights: require('./teams/knights.png'),
+  'Polar Bears': require('./teams/polarbears.png'), 
+  'Eastern Elite': require('./teams/easternelite.png'), 
+  Panthers: require('./teams/panthers.png'),
+};
 
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];  
@@ -111,7 +120,7 @@ const Profile: React.FC<any> = ({ navigation }) => {
           onClose={() => setProfileSettingsModalVisible(false)} 
         />
       )}
-      <TouchableOpacity style={styles.card} onPress={handleFollowClubPress}>
+       <TouchableOpacity style={styles.card} onPress={handleFollowClubPress}>
         <View style={styles.cardContent}>
           <Text style={styles.cardHeader}>My Team</Text>
           <Text style={styles.cardSubHeader}>
@@ -120,6 +129,13 @@ const Profile: React.FC<any> = ({ navigation }) => {
               : 'Follow your favorite team, stay updated with the latest news and scores'}
           </Text>
         </View>
+        {followedClub && teamImages[followedClub as TeamName] && (
+          <Image
+            source={teamImages[followedClub as TeamName]}
+            style={styles.teamLogo}
+            resizeMode="contain"
+          />
+        )}
       </TouchableOpacity>
       {followClubModalVisible && (
         <FollowClub
@@ -160,7 +176,11 @@ const Profile: React.FC<any> = ({ navigation }) => {
           <Text style={styles.cardHeaderOptions}>Notifications</Text>
         </View>
       </TouchableOpacity>
-
+      <View style={styles.signUpButtonWrapper}>
+      <TouchableOpacity style={styles.SignUpbuttonContainer} onPress={() => navigation.navigate('Home')}>
+      <Text style={styles.buttonTextSignup}>Log Out</Text>
+        </TouchableOpacity>
+      </View>
       <Modal
         animationType="slide"
         transparent={true}
@@ -323,6 +343,31 @@ const styles = StyleSheet.create({
   },
   switch: {
     top:-25,
+  },
+  teamLogo: {
+    width: 50,
+    height: 50,
+    marginLeft: 10,
+    borderRadius: 10,
+  },
+  signUpButtonWrapper: {
+    marginTop: 45,
+    alignItems: 'center',
+    position: 'relative',
+    width: '100%',
+  },
+  SignUpbuttonContainer: {
+    backgroundColor: '#000000FF',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    width: '90%',
+    zIndex:5,
+  },
+  buttonTextSignup:{
+    color:'#fff',
+    fontFamily:'BebasNeue-Regular',
+    fontSize:18,
   }
 });
 
