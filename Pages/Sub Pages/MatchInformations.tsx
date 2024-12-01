@@ -30,11 +30,6 @@ const playerIcon = require('../playericon.png');
 
 type TeamName = 'potatoes' | 'knights' | 'polarbears' | 'easternelite' | 'panthers';
 
-interface Player {
-  name: string;
-  position: string;
-}
-
 const normalizeTeamName = (teamName: string): TeamName => {
   return teamName.replace(/\s+/g, '').toLowerCase() as TeamName;
 };
@@ -154,12 +149,12 @@ const MatchInformations: React.FC<any> = ({ route }) => {
             <View key={index} style={styles.playerWrapper}>
               <Image source={playerIcon} style={styles.playerIcon} />
               <Text 
-  style={styles.playerText} 
-  numberOfLines={1} 
-  ellipsizeMode="tail"
->
-  {player.name}
-</Text>
+                style={styles.playerText} 
+                numberOfLines={1} 
+                ellipsizeMode="tail"
+              >
+                {player.name}
+              </Text>
               <Text style={styles.playerPosition}>{player.position}</Text>
             </View>
           ))}
@@ -330,7 +325,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 46,
     transform: [{ rotate: '90deg' }],
-    borderRadius: 40,  // Add this to round the corners
+    borderRadius: 40,  
 },
   formation:{
     position: 'absolute',
